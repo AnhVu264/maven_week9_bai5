@@ -1,0 +1,33 @@
+name: CI/CD - Test Coverage (Bài 5)
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'oracle'
+          cache: 'maven'
+
+      # Chạy verify để kích hoạt tính toán Test Coverage của JaCoCo
+      - name: Build and Verify Coverage
+        run: mvn -B clean verify
+
+      # Luôn luôn upload báo cáo độ bao phủ, ngay cả khi build bị fail do không đạt 80%
+      - name: Upload JaCoCo Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-coverage-report
+          path: target/site/jacoco/
+          retention-days: 7
